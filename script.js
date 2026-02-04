@@ -108,11 +108,27 @@ function adjustValue(type, change) {
   element.textContent = value;
 }
 
-// Initialize values from localStorage when the page loads
+// Get initial player count from URL ?p=N or localStorage
+function getInitialPlayerCount() {
+  const params = new URLSearchParams(window.location.search);
+  const p = params.get('p');
+  if (p !== null) {
+    const value = parseInt(p, 10);
+    if (!isNaN(value) && value >= 5 && value <= 15) {
+      return value;
+    }
+    window.location.replace(`${window.location.pathname}?p=10`);
+    return 10;
+  }
+  return loadFromStorage(STORAGE_KEYS.PLAYERS, 'PLAYERS');
+}
+
+// Initialize values from URL/localStorage when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  // Load and set player count
-  const playerCount = loadFromStorage(STORAGE_KEYS.PLAYERS, 'PLAYERS');
+  // Load and set player count (URL ?p=N overrides storage)
+  const playerCount = getInitialPlayerCount();
   document.getElementById('players-value').textContent = playerCount;
+  saveToStorage(STORAGE_KEYS.PLAYERS, playerCount);
   updateCharacterCounts(playerCount);
 
   // Load and set traveller count
